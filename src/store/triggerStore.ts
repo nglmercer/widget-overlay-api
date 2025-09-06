@@ -9,10 +9,10 @@ const triggerStorage = new DataStorage<TriggerData>(
   new JSONFileAdapter(TriggerPath)
 )
 async function queryTrigger(params: {
-  type: MediaType
   url: string
   name?: string
   id?: string
+  type?: MediaType
 }): Promise< Record<string, TriggerData>> {
   const { type, url, name, id } = params
   const all = await triggerStorage.getAll()
@@ -22,8 +22,8 @@ async function queryTrigger(params: {
   const filtered = Object.values(all).filter((r) => {
     if (id && r.id !== id) return false
     if (name && r.name !== name) return false
-    if (type && r.type !== type) return false
-    if (url && r.item.url !== url) return false
+    if (type && r.item?.type !== type) return false
+    if (url && r.item?.url !== url) return false
     return true
   })
   return filtered.reduce((acc, cur) => {

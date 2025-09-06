@@ -1,1 +1,26 @@
-{}
+{
+  "c936f372-fd93-4623-b2b8-672923fcbb9c": {
+    "name": "data123",
+    "item": {
+      "id": "326bd326-3142-4066-8842-d750b9001a28",
+      "name": "128845117.png",
+      "type": "image",
+      "url": "/uploads/images/326bd326-3142-4066-8842-d750b9001a28.png",
+      "metadata": {
+        "size": 270566,
+        "type": "image/png"
+      }
+    },
+    "type": "image",
+    "size": 50,
+    "duration": 5,
+    "maxDuration": true,
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "randomPosition": true,
+    "active": true,
+    "id": "c936f372-fd93-4623-b2b8-672923fcbb9c"
+  }
+}

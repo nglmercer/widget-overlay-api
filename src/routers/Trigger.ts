@@ -18,17 +18,17 @@ TriggerRouter.get('/data/:type', async (c) => {
     return c.json({ error: "Invalid media type. Use image, audio, or video." }, 400)
   }
   const data = await triggerStorage.getAll()
-  const filtered = Object.values(data).filter((m) => m.type === type)
+  const filtered = Object.values(data).filter((m) => m.item?.type === type)
   return c.json(filtered)
 })
 
 TriggerRouter.post('/create', async (c) => {
-  const data = (await c.req.json()) as TriggerData
+  const data = (await c.req.json()) as TriggerData;
+  if (!data.item){
+    return c.json({ error: 'Item is required' }, 400)
+  }
   if (!data.id) {
     data.id  = crypto.randomUUID()
-  }
-  if (!data.type) {
-    return c.json({ error: 'Type is required' }, 400)
   }
   await triggerStorage.save(data.id, data)
   return c.json(data, 201)
