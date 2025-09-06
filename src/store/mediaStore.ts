@@ -1,28 +1,21 @@
-import { DataStorage } from 'json-obj-manager'
-import { JSONFileAdapter } from 'json-obj-manager/node'
-import path from 'path'
-const MediaPath = path.join(process.cwd(), 'media', 'media.json')
+import { DataStorage } from 'json-obj-manager';
+import { JSONFileAdapter } from 'json-obj-manager/node';
+import path from 'path';
+import type{ MediaType,MediaItem } from './types';
+const MediaPath = path.join(process.cwd(), 'media', 'media.json');
 
-export interface MediaData {
-  id: string
-  type: 'image' | 'audio' | 'video'
-  url: string
-  name: string
-  metadata: {
-    [key: string]: any
-  }
-}
 
-const mediaStorage = new DataStorage<MediaData>(
+
+const mediaStorage = new DataStorage<MediaItem>(
   new JSONFileAdapter(MediaPath)
 )
 
 export async function ensureRecordForUrl(params: {
-  type: 'image' | 'audio' | 'video'
+  type: MediaType
   url: string
   name?: string
   metadata?: Record<string, any>
-}): Promise<MediaData> {
+}): Promise<MediaItem> {
   const { type, url, name, metadata } = params
   const all = await mediaStorage.getAll()
 
@@ -33,7 +26,7 @@ export async function ensureRecordForUrl(params: {
   if (existing) return existing
 
   const id = crypto.randomUUID()
-  const record: MediaData = {
+  const record: MediaItem = {
     id,
     type,
     url,
