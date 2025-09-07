@@ -1,4 +1,4 @@
-import { Hono } from "hono"
+import { Hono,Context } from "hono"
 import path from "path"
 import fs from "fs"
 import { mkdir } from "fs/promises"
@@ -6,7 +6,9 @@ import { mediaStorage, ensureRecordForUrl } from "../store/mediaStore"
 import { triggerStorage, queryTrigger } from "../store/triggerStore"
 import type { MediaType, TriggerData } from "../store/types"
 const TriggerRouter = new Hono()
-
+function returnNotFound(c:Context,text='NotFound'){
+  return c.json({ error: text }, 404)
+}
 TriggerRouter.get('/data', async (c) => {
   const data = await triggerStorage.getAll()
   return c.json(data)
@@ -34,13 +36,50 @@ TriggerRouter.post('/create', async (c) => {
   return c.json(data, 201)
 })
 
+TriggerRouter.post('/toggle/:id/:active',async(c)=>{
+  const params = c.req.param();
+  const id = params.id;
+  const toggle = params.active;
+  if (toggle !== 'activate' && toggle !== 'deactivate' || !id) {
+    return c.json({ error: 'Invalid Params.',data:{id,params,toggle} }, 400)
+  }
+  try {
+    const trigger = await triggerStorage.load(id);
+    if (!trigger) {
+      return returnNotFound(c,'Trigger not found')
+    }
+    trigger.active = toggle === 'activate'
+    await triggerStorage.save(id, trigger)
+    return c.json(trigger)
+  }catch (e) {
+    return c.json({ error: 'Failed to toggle trigger' }, 500)
+  }
+})
+TriggerRouter.post('/toggle/:id',async(c)=>{
+  const params = c.req.param()
+  const id = params.id
+  if (!id) {
+    return c.json({ error: 'Not exit id',data:{id}}, 400)
+  }
+  try {
+    const trigger = await triggerStorage.load(id);
+    if (!trigger) {
+      return returnNotFound(c,'Trigger not found')
+    }
+    trigger.active = !trigger.active
+    await triggerStorage.save(id, trigger)
+    return c.json(trigger)
+  }catch (e) {
+    return c.json({ error: 'Failed to toggle trigger' }, 500)
+  }
+})
 TriggerRouter.delete('/:id', async (c) => {
   const params = c.req.param()
   const id = params.id
   try {
     const trigger = await triggerStorage.load(id)
     if (!trigger) {
-      return c.json({ error: 'Trigger not found' }, 404)
+      return returnNotFound(c,'Trigger not found')
     }
     await triggerStorage.delete(id)
   } catch (e) {
@@ -67,7 +106,6 @@ TriggerRouter.put('/:id', async (c) => {
   }
   return c.json(data)
 })
-
 TriggerRouter.get('/:id', async (c) => {
   const params = c.req.param()
   const id = params.id

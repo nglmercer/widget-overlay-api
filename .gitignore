@@ -2,3 +2,4 @@
 node_modules/
 uploads/*
 media/*
+triggers/*.json
