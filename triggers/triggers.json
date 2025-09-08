@@ -1,6 +1,8 @@
 {
   "e12964c2-3d4d-431d-b077-bb51a6ed1e15": {
+    "id": "e12964c2-3d4d-431d-b077-bb51a6ed1e15",
     "name": "dadasdasd",
+    "type": "video",
     "duration": 5,
     "maxDuration": false,
     "active": true,
@@ -14,15 +16,13 @@
         "type": "video/mp4"
       }
     },
-    "type": "video",
     "size": 50,
     "volume": 50,
     "position": {
       "x": 0,
       "y": 0
     },
-    "randomPosition": false,
-    "id": "e12964c2-3d4d-431d-b077-bb51a6ed1e15"
+    "randomPosition": false
   },
   "c8652b87-96d2-4d06-9d46-d0fa945e9c87": {
     "name": "asdasdasd",
