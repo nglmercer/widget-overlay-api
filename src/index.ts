@@ -32,6 +32,10 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log(`Client disconnected: ${socket.id}`)
   })
+  socket.on('TriggerEvents:ID', (data) => {
+    console.log('TriggerEvents:ID',data)
+    io.emit('TriggerEvents:ID',data)
+  })
 })
 app.get(
   '/ws',
