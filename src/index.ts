@@ -7,7 +7,8 @@ import { upgradeWebSocket, websocket } from 'hono/bun'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { ServerWebSocket } from 'bun';
-import { io,type WebSocketData } from './websocket-adapter'
+import { io,type WebSocketData } from './websocket-adapter';
+import { emitter } from './Emitter'
 const app = new Hono()
 app.use(logger())
 app.use(cors({
@@ -16,7 +17,7 @@ app.use(cors({
 app.get('/', (c) => {
   return c.text('Hello Hono!')
 })
-
+const defaultTriggerEvent = "TriggerEvents:ID"
 // Serve uploaded files
 app.use('/uploads/*', serveStatic({ root: './' }))
 
@@ -32,9 +33,13 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log(`Client disconnected: ${socket.id}`)
   })
-  socket.on('TriggerEvents:ID', (data) => {
-    console.log('TriggerEvents:ID',data)
-    io.emit('TriggerEvents:ID',data)
+  emitter.on(defaultTriggerEvent, (data) => {
+    console.log(defaultTriggerEvent,data)
+    io.emit(defaultTriggerEvent,data)
+  })
+  socket.on(defaultTriggerEvent, (data) => {
+    console.log(defaultTriggerEvent,data)
+    io.emit(defaultTriggerEvent,data)
   })
 })
 app.get(

@@ -5,7 +5,9 @@ import { mkdir } from "fs/promises"
 import { mediaStorage, ensureRecordForUrl } from "../store/mediaStore"
 import { triggerStorage, queryTrigger } from "../store/triggerStore"
 import type { MediaType, TriggerData } from "../store/types"
+import { emitter } from "../Emitter"
 const TriggerRouter = new Hono()
+const defaultTriggerEvent = "TriggerEvents:ID"
 function returnNotFound(c:Context,text='NotFound'){
   return c.json({ error: text }, 404)
 }
@@ -124,5 +126,23 @@ TriggerRouter.get('/query', async (c) => {
   const { type, url, name, id } = c.req.query()
   const result = await queryTrigger({ type: type as MediaType, url, name, id })
   return c.json(result)
+})
+TriggerRouter.post('/emit/:id', async (c) => {
+  const params = c.req.param()
+  const id = params.id
+  if (!id) {
+    return c.json({ error: 'Not exit id',data:{id}}, 400)
+  }
+  emitter.emit(defaultTriggerEvent,id)
+  return c.json({ id })
+})
+TriggerRouter.get('/emit/:id', async (c) => {
+  const params = c.req.param()
+  const id = params.id
+  if (!id) {
+    return c.json({ error: 'Not exit id',data:{id}}, 400)
+  }
+  emitter.emit(defaultTriggerEvent,id)
+  return c.json({ id })
 })
 export { TriggerRouter}
