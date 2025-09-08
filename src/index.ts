@@ -8,7 +8,10 @@ import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { ServerWebSocket } from 'bun';
 import { io,type WebSocketData } from './websocket-adapter';
-import { emitter } from './Emitter'
+import { emitter } from './Emitter';
+import { loadConfig,createConfigFile,saveConfig } from './config'
+createConfigFile()
+const config = loadConfig()
 const app = new Hono()
 app.use(logger())
 app.use(cors({
@@ -67,9 +70,23 @@ app.get(
     }
   })
 )
-const server = Bun.serve({
-  fetch: app.fetch,
-  port: 3000,
-  websocket,
-});
-console.log(`Server running on port ${server.port}`);
+try {
+  const server = Bun.serve({
+    fetch: app.fetch,
+    port: config.port,
+    websocket,
+  });
+  console.log(`Server running on port ${server.port}`);
+  saveConfig({
+    port: server.port,
+  })
+} catch (error) {
+   const server = Bun.serve({
+    fetch: app.fetch,
+    port: 0,
+    websocket,
+  });
+  saveConfig({
+    port: server.port,
+  })
+}
