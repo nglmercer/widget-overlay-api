@@ -27,9 +27,11 @@ http://localhost:3000
 ├─ src/
 │  ├─ index.ts                # App setup, middleware, route mounting
 │  ├─ routers/
-│  │  └─ media.ts             # Media upload + delete endpoints
+│  │  ├─ media.ts             # Media upload + delete endpoints
+│  │  └─ Trigger.ts           # Trigger management and emission endpoints
 │  └─ store/
-│     └─ mediaStore.ts        # JSON-backed metadata store
+│     ├─ mediaStore.ts        # JSON-backed metadata store
+│     └─ triggerStore.ts      # JSON-backed trigger metadata store
 ├─ uploads/                   # Created at runtime (images/, audios/, videos/)
 ├─ media/media.json           # Created at runtime by json-obj-manager
 └─ package.json
@@ -87,6 +89,64 @@ DELETE `/api/media/:id`
 ```sh
 curl -X DELETE http://localhost:3000/api/media/<id>
 ```
+
+### List all triggers
+GET `/api/trigger/data`
+- Returns an array of all trigger records
+
+### List triggers by type
+GET `/api/trigger/data/:type`
+- `:type` = `image` | `audio` | `video`
+- Returns an array of trigger records filtered by media type
+
+### Create a trigger
+POST `/api/trigger/create`
+- Content-Type: `application/json`
+- Body: `TriggerData` object (e.g., `{"item": {"type": "image", "url": "/uploads/images/some-image.png"}, "id": "some-uuid"}`)
+- 201 Response: The created `TriggerData` object
+
+### Toggle trigger activation
+POST `/api/trigger/toggle/:id/:active`
+- `:id` = UUID of the trigger
+- `:active` = `activate` | `deactivate`
+- Toggles the `active` status of a trigger
+
+POST `/api/trigger/toggle/:id`
+- `:id` = UUID of the trigger
+- Toggles the `active` status of a trigger (flips current state)
+
+### Delete a trigger
+DELETE `/api/trigger/:id`
+- `:id` = UUID of the trigger
+- Deletes the trigger record
+
+### Update a trigger
+PUT `/api/trigger/:id`
+- `:id` = UUID of the trigger
+- Content-Type: `application/json`
+- Body: `TriggerData` object (ID in path and body must match)
+- Updates an existing trigger record
+
+### Get a single trigger
+GET `/api/trigger/:id`
+- `:id` = UUID of the trigger
+- Returns a single trigger record
+
+### Query triggers
+GET `/api/trigger/query`
+- Query parameters: `type` (image|audio|video), `url`, `name`, `id`
+- Returns trigger records matching the query
+
+### Emit a trigger event
+POST `/api/trigger/emit`
+- Content-Type: `application/json`
+- Body: `TriggerData` object (must contain `id`)
+- Emits a WebSocket event for the specified trigger ID
+
+POST `/api/trigger/emit/:id`
+- `:id` = UUID of the trigger
+- Emits a WebSocket event for the specified trigger ID
+
 
 ## Notes
 - Access uploaded files directly at the `url` returned in the upload response.

@@ -8,9 +8,6 @@ import type { MediaType, TriggerData } from "../store/types"
 import { emitter } from "../Emitter"
 const TriggerRouter = new Hono()
 const defaultTriggerEvent = "TriggerEvents:ID"
-function returnNotFound(c:Context,text='NotFound'){
-  return c.json({ error: text }, 404)
-}
 TriggerRouter.get('/data', async (c) => {
   const data = await triggerStorage.getAll()
   return c.json(data)
@@ -48,7 +45,7 @@ TriggerRouter.post('/toggle/:id/:active',async(c)=>{
   try {
     const trigger = await triggerStorage.load(id);
     if (!trigger) {
-      return returnNotFound(c,'Trigger not found')
+      return c.json({ error: 'Trigger not found' }, 404)
     }
     trigger.active = toggle === 'activate'
     await triggerStorage.save(id, trigger)
@@ -66,7 +63,7 @@ TriggerRouter.post('/toggle/:id',async(c)=>{
   try {
     const trigger = await triggerStorage.load(id);
     if (!trigger) {
-      return returnNotFound(c,'Trigger not found')
+      return c.json({ error: 'Trigger not found' }, 404)
     }
     trigger.active = !trigger.active
     await triggerStorage.save(id, trigger)
@@ -81,7 +78,7 @@ TriggerRouter.delete('/:id', async (c) => {
   try {
     const trigger = await triggerStorage.load(id)
     if (!trigger) {
-      return returnNotFound(c,'Trigger not found')
+      return c.json({ error: 'Trigger not found' }, 404)
     }
     await triggerStorage.delete(id)
   } catch (e) {
@@ -126,6 +123,14 @@ TriggerRouter.get('/query', async (c) => {
   const { type, url, name, id } = c.req.query()
   const result = await queryTrigger({ type: type as MediaType, url, name, id })
   return c.json(result)
+})
+TriggerRouter.post('/emit', async (c) => {
+  const data = (await c.req.json()) as TriggerData
+  if (!data.id) {
+    return c.json({ error: 'Not exit id',data}, 400)
+  }
+  emitter.emit(defaultTriggerEvent,data.id)
+  return c.json(data)
 })
 TriggerRouter.post('/emit/:id', async (c) => {
   const params = c.req.param()
